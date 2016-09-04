@@ -1,3 +1,5 @@
 <resources>
-    <string name="app_name">J.A.R.V.I.S.</string>
+    <string name="app_name">Jarvis Mark II</string>
+    <string name="speak_button">speak button</string>
+    <string name="jarvis_logo">Jarvis logo</string>
 </resources>

@@ -1,6 +1,7 @@
-package com.example.jarvis;
+package com.example.jarvismarkii;
 
 import android.util.Log;
+import android.widget.ProgressBar;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -20,31 +21,47 @@ import java.nio.charset.Charset;
 public final class NetworkParseResponse {
     private static URL url = null;
     private static String botResponse = null;
+    private static ProgressBar progressBar = null;
 
 
     public static void formURL(String talkWord, long uid) {
         try {
             talkWord = talkWord.replace(" ", "%20").replace("!", "");
-            String urlBuild="http://api.brainshop.ai/get?bid=261&key=zVD8G6DFUDCU63zQ&uid="
-                    +Long.toString(uid)+"&msg="+talkWord;
-            Log.v("Project JARVIS",urlBuild);
+            String urlBuild = "http://api.brainshop.ai/get?bid=261&key=zVD8G6DFUDCU63zQ&uid="
+                    + Long.toString(uid) + "&msg=" + talkWord;
+            Log.v(UIActivity.LOG_TAG, urlBuild);
             url = new URL(urlBuild);
+            publishProgress(5);
         } catch (MalformedURLException e) {
             e.printStackTrace();
         }
     }
 
+    public static void appendProgressBar(ProgressBar progress) {
+        progressBar = progress;
+    }
+
     public static void establishConnectionGetResponse() {
         try {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+            publishProgress(20);
             urlConnection.setRequestMethod("GET");
+            publishProgress(35);
             urlConnection.setRequestProperty("X-Mashape-Key", "9y0yWglKG9mshIE43rz8TP9RHdnwp1RvLzmjsnrr3o0PODJYh1");
+            publishProgress(55);
             urlConnection.connect();
+            publishProgress(75);
             String jsonData = getStringFromInputStream(urlConnection.getInputStream());
+            publishProgress(90);
             botResponse = parseBotResponse(jsonData);
+            publishProgress(100);
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    private static void publishProgress(int progress) {
+        progressBar.setProgress(progress);
     }
 
     private static String getStringFromInputStream(InputStream inputStream) throws IOException {
@@ -63,15 +80,15 @@ public final class NetworkParseResponse {
     private static String parseBotResponse(String jsonData) {
         try {
             JSONObject rootObject = new JSONObject(jsonData);
-            Log.v("Project JARVIS",rootObject.getString("cnt").replace("\\",""));
-            return rootObject.getString("cnt").replace("\\","");
+            Log.v(UIActivity.LOG_TAG, rootObject.getString("cnt").replace("\\", ""));
+            return rootObject.getString("cnt").replace("\\", "").replace("<notts voice=\"I'm searching...\"/>", "");
         } catch (JSONException e) {
             e.printStackTrace();
         }
         return null;
     }
 
-    public static String getBotResponse(){
+    public static String getBotResponse() {
         return botResponse;
     }
 
