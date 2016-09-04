@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Jarvis Mark II</string>
+    <string name="app_name">Jarvis</string>
     <string name="speak_button">speak button</string>
     <string name="jarvis_logo">Jarvis logo</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.example.jarvismarkii;
+package com.example.jarvis;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
