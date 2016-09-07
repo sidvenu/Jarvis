@@ -1,6 +1,6 @@
-# Jarvis Mark II: Your best pal
+# Jarvis: Your best pal
  
-Have you ever wondered if there could be an Artificially Intelligent program like Jarvis from Iron Man? Jarvis Mark II is the unofficial version of Jarvis in the real world! It is not so intelligent like Iron Man's Jarvis, but you could relate.
+Have you ever wondered if there could be an Artificially Intelligent program like Jarvis from Iron Man? This app is an unofficial version of Jarvis in the real world! You cannot expect it to be so intelligent like Iron Man's Jarvis, but you could relate.
 
 ##Features
 
@@ -20,8 +20,8 @@ Have you ever wondered if there could be an Artificially Intelligent program lik
   
 ##Downloads
 
-The latest and pre-release versions are [available on GitHub](https://github.com/SiddharthVenu/Jarvis-Mark-II/releases/).
-Save a click by going to [the latest version](https://github.com/SiddharthVenu/Jarvis-Mark-II/releases/latest).
+The latest and pre-release versions are [available on GitHub](https://github.com/SiddharthVenu/Jarvis/releases/).
+Save a click by going to [the latest version](https://github.com/SiddharthVenu/Jarvis/releases/latest).
 
 ## How to contribute
 
