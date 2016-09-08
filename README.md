@@ -2,7 +2,7 @@
  
 Have you ever wondered if there could be an Artificially Intelligent program like Jarvis from Iron Man? This app is an unofficial version of Jarvis in the real world! You cannot expect it to be so intelligent like Iron Man's Jarvis, but you could relate.
 
-##Features
+## Features
 
 * Chat with Jarvis as long as you want, hands-free with voice recognition!
 
@@ -13,12 +13,12 @@ Have you ever wondered if there could be an Artificially Intelligent program lik
 * Use him as your personal mathematician!
 
 <img src="http://i.imgur.com/h916Slg.png" width="350" />
+* Open other apps using Jarvis seamlessly using the command "Open *App*".
 * **Coming soon:**
   * Option to switch between On-screen keyboard and Voice Recognition.
-  * Open other apps using Jarvis seamlessly.
   * Jarvis speaks!
   
-##Downloads
+## Downloads
 
 The latest and pre-release versions are [available on GitHub](https://github.com/SiddharthVenu/Jarvis/releases/).
 Save a click by going to [the latest version](https://github.com/SiddharthVenu/Jarvis/releases/latest).
