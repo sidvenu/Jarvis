@@ -1,6 +1,5 @@
-package com.example.jarvis;
+package io.github.siddharthvenu.jarvis;
 
-import android.util.Log;
 import android.widget.ProgressBar;
 
 import org.json.JSONException;
@@ -29,7 +28,7 @@ public final class NetworkParseResponse {
             talkWord = talkWord.replace(" ", "%20").replace("!", "");
             String urlBuild = "http://api.brainshop.ai/get?bid=261&key=zVD8G6DFUDCU63zQ&uid="
                     + Long.toString(uid) + "&msg=" + talkWord;
-            Log.v(UIActivity.LOG_TAG, urlBuild);
+            //Log.v(UIActivity.LOG_TAG, urlBuild);
             url = new URL(urlBuild);
             publishProgress(5);
         } catch (MalformedURLException e) {
@@ -80,7 +79,7 @@ public final class NetworkParseResponse {
     private static String parseBotResponse(String jsonData) {
         try {
             JSONObject rootObject = new JSONObject(jsonData);
-            Log.v(UIActivity.LOG_TAG, rootObject.getString("cnt").replace("\\", ""));
+            //Log.v(UIActivity.LOG_TAG, rootObject.getString("cnt").replace("\\", ""));
             return rootObject.getString("cnt").replace("\\", "").replace("<notts voice=\"I'm searching...\"/>", "");
         } catch (JSONException e) {
             e.printStackTrace();

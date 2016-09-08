@@ -1,23 +1,32 @@
-package com.example.jarvis;
+package io.github.siddharthvenu.jarvis;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ApplicationInfo;
+import android.graphics.Point;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.speech.RecognizerIntent;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import com.example.jarvis.R;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class UIActivity extends AppCompatActivity {
 
@@ -70,15 +79,78 @@ public class UIActivity extends AppCompatActivity {
         return net != null && net.isAvailable() && net.isConnected();
     }
 
+    @SuppressLint("SetTextI18n")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             chat = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
             nammaInput.setText(chat);
-            Log.v(LOG_TAG, chat);
-            new NetworkAsyncTask().execute(chat);
+            //Log.v(LOG_TAG, chat);
+            if (!(isAppOpenCommand())) new NetworkAsyncTask().execute(chat);
+            else {
+                botResponseTextView.setText("Opening...");
+                String requestedAppName = chat.substring(chat.indexOf("open ") + 5);
+                List<ApplicationInfo> appList = getPackageManager().getInstalledApplications(0);
+                appList = retrieveMatchedAppInfos(appList, requestedAppName);
+
+                if (appList.size() == 0) //Log.v(LOG_TAG, "App not found");
+                    botResponseTextView.setText("No app called \""+requestedAppName+"\" was found. This can't be happening :(");
+                else if (appList.size() == 1) {
+                    startActivity(getPackageManager().getLaunchIntentForPackage(appList.get(0).packageName));
+                    botResponseTextView.setText("Have fun!");
+                }
+                else{
+                    showAlertDialog((ArrayList<ApplicationInfo>) appList);
+                    botResponseTextView.setText("Have fun!");
+                }
+            }
         }
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void showAlertDialog(final ArrayList<ApplicationInfo> appList) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Choose an application");
+        builder.setItems(getAppNames(appList), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //Log.v(LOG_TAG, appList.get(which).packageName);
+                startActivity(getPackageManager().getLaunchIntentForPackage(appList.get(which).packageName));
+            }
+        });
+        AlertDialog alertDialog = builder.create();
+        alertDialog.show();
+
+        WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
+
+        lp.copyFrom(alertDialog.getWindow().getAttributes());
+        Point size = new Point();
+        getWindowManager().getDefaultDisplay().getSize(size);
+        lp.height = (size.y)*2/3;
+        alertDialog.getWindow().setAttributes(lp);
+    }
+
+    private String[] getAppNames(List<ApplicationInfo> appList) {
+        ArrayList<String> appNames = new ArrayList<>();
+        for (ApplicationInfo appInfo : appList) {
+            appNames.add(getPackageManager().getApplicationLabel(appInfo).toString());
+        }
+        return appNames.toArray(new String[appNames.size()]);
+    }
+
+    private ArrayList<ApplicationInfo> retrieveMatchedAppInfos(List<ApplicationInfo> appList, String requestedAppName) {
+        ArrayList<ApplicationInfo> matchingAppNames = new ArrayList<>();
+        for (ApplicationInfo appInfo : appList) {
+            String appName = getPackageManager().getApplicationLabel(appInfo).toString();
+            if (appName.toLowerCase().contains(requestedAppName.toLowerCase())) {
+                matchingAppNames.add(appInfo);
+            }
+        }
+        return matchingAppNames;
+    }
+
+    private boolean isAppOpenCommand() {
+        return chat.contains("open ");
     }
 
     private class NetworkAsyncTask extends AsyncTask<String, Integer, String> {
