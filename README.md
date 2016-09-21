@@ -13,7 +13,7 @@ Have you ever wondered if there could be an Artificially Intelligent program lik
 * Use him as your personal mathematician!
 
 <img src="http://i.imgur.com/h916Slg.png" width="350" />
-* Open other apps using Jarvis seamlessly using the command *Open **App***.
+* Open other apps using Jarvis seamlessly using the command *Open App*.
 * Exit Jarvis app using voice commands like *bye*, *gotta go*.
 * **Coming soon:**
   * Option to switch between On-screen keyboard and Voice Recognition.
