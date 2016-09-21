@@ -2,6 +2,6 @@
     <string name="app_name">Jarvis</string>
     <string name="speak_button">speak button</string>
     <string name="jarvis_logo">Jarvis logo</string>
-    <string name="exit_message">It was good chatting with you. See ya!</string>
+    <string name="exit_message">It's been a pleasure to be in your company, my friend</string>
     <string name="opening_app">Opening the app for you. Have fun!</string>
 </resources>
