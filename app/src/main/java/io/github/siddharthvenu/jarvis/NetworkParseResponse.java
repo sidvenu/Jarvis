@@ -17,13 +17,13 @@ import java.nio.charset.Charset;
 /**
  * Created by Siddharth Venu on Aug 2016.
  */
-public final class NetworkParseResponse {
+final class NetworkParseResponse {
     private static URL url = null;
     private static String botResponse = null;
-    private static ProgressBar progressBar = null;
+    private ProgressBar progressBar = null;
 
 
-    public static void formURL(String talkWord, long uid) {
+    void formURL(String talkWord, long uid) {
         try {
             talkWord = talkWord.replace(" ", "%20").replace("!", "");
             String urlBuild = "http://api.brainshop.ai/get?bid=261&key=zVD8G6DFUDCU63zQ&uid="
@@ -36,11 +36,11 @@ public final class NetworkParseResponse {
         }
     }
 
-    public static void appendProgressBar(ProgressBar progress) {
+    void appendProgressBar(ProgressBar progress) {
         progressBar = progress;
     }
 
-    public static void establishConnectionGetResponse() {
+    void establishConnectionGetResponse() {
         try {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
             publishProgress(20);
@@ -59,11 +59,11 @@ public final class NetworkParseResponse {
         }
     }
 
-    private static void publishProgress(int progress) {
+    private void publishProgress(int progress) {
         progressBar.setProgress(progress);
     }
 
-    private static String getStringFromInputStream(InputStream inputStream) throws IOException {
+    private String getStringFromInputStream(InputStream inputStream) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         if (inputStream != null) {
             BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(inputStream, Charset.forName("UTF-8")));
@@ -76,7 +76,7 @@ public final class NetworkParseResponse {
         return stringBuilder.toString();
     }
 
-    private static String parseBotResponse(String jsonData) {
+    private String parseBotResponse(String jsonData) {
         try {
             JSONObject rootObject = new JSONObject(jsonData);
             //Log.v(UIActivity.LOG_TAG, rootObject.getString("cnt").replace("\\", ""));
@@ -87,7 +87,7 @@ public final class NetworkParseResponse {
         return null;
     }
 
-    public static String getBotResponse() {
+    String getBotResponse() {
         return botResponse;
     }
 

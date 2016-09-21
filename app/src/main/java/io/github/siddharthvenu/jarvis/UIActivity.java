@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -30,10 +31,10 @@ import java.util.List;
 
 public class UIActivity extends AppCompatActivity {
 
-    public static final String LOG_TAG = "Project JARVIS";
-    static TextView botResponseTextView, nammaInput;
-    static ImageView jarvisLogo;
-    static ProgressBar progress;
+    //public static final String LOG_TAG = "Project JARVIS";
+    private TextView botResponseTextView, nammaInput;
+    private ImageView jarvisLogo;
+    public ProgressBar progress;
     private final int REQUEST_CODE = 1234;
     SharedPreferences preferences;
     String chat = "Hey there!";
@@ -86,24 +87,14 @@ public class UIActivity extends AppCompatActivity {
             chat = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
             nammaInput.setText(chat);
             //Log.v(LOG_TAG, chat);
-            if (!(isAppOpenCommand())) new NetworkAsyncTask().execute(chat);
-            else {
-                botResponseTextView.setText("Opening...");
-                String requestedAppName = chat.substring(chat.indexOf("open ") + 5);
-                List<ApplicationInfo> appList = getPackageManager().getInstalledApplications(0);
-                appList = retrieveMatchedAppInfos(appList, requestedAppName);
 
-                if (appList.size() == 0) //Log.v(LOG_TAG, "App not found");
-                    botResponseTextView.setText("No app called \""+requestedAppName+"\" was found. This can't be happening :(");
-                else if (appList.size() == 1) {
-                    startActivity(getPackageManager().getLaunchIntentForPackage(appList.get(0).packageName));
-                    botResponseTextView.setText("Have fun!");
-                }
-                else{
-                    showAlertDialog((ArrayList<ApplicationInfo>) appList);
-                    botResponseTextView.setText("Have fun!");
-                }
-            }
+            if (isAppOpenCommand()) {
+                openApp();
+
+            } else if (isAppExitCommand()) {
+                exit();
+            } else new NetworkAsyncTask().execute(chat);
+
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -122,11 +113,10 @@ public class UIActivity extends AppCompatActivity {
         alertDialog.show();
 
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams();
-
         lp.copyFrom(alertDialog.getWindow().getAttributes());
         Point size = new Point();
         getWindowManager().getDefaultDisplay().getSize(size);
-        lp.height = (size.y)*2/3;
+        lp.height = (size.y) * 2 / 3;
         alertDialog.getWindow().setAttributes(lp);
     }
 
@@ -150,7 +140,39 @@ public class UIActivity extends AppCompatActivity {
     }
 
     private boolean isAppOpenCommand() {
-        return chat.contains("open ");
+        return chat.toLowerCase().contains("open ");
+    }
+
+    private boolean isAppExitCommand() {
+        String temp = chat.toLowerCase();
+        return temp.contains("exit")||temp.contains("bye")||temp.contains("gotta go")||temp.contains("got to go");
+    }
+
+    private void openApp() {
+        String requestedAppName = chat.substring(chat.indexOf("open ") + 5);
+        List<ApplicationInfo> appList = getPackageManager().getInstalledApplications(0);
+        appList = retrieveMatchedAppInfos(appList, requestedAppName);
+
+        if (appList.size() == 0) //Log.v(LOG_TAG, "App not found");
+            botResponseTextView.setText("No app called \"" + requestedAppName + "\" was found. This can't be happening :(");
+        else if (appList.size() == 1) {
+            botResponseTextView.setText(R.string.opening_app);
+            startActivity(getPackageManager().getLaunchIntentForPackage(appList.get(0).packageName));
+        } else {
+            botResponseTextView.setText(R.string.opening_app);
+            showAlertDialog((ArrayList<ApplicationInfo>) appList);
+        }
+    }
+
+    private void exit() {
+        botResponseTextView.setText(R.string.exit_message);
+        Handler mHandler = new Handler();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                finish();
+            }
+        }, 2000);
     }
 
     private class NetworkAsyncTask extends AsyncTask<String, Integer, String> {
@@ -166,12 +188,13 @@ public class UIActivity extends AppCompatActivity {
         @Override
         protected String doInBackground(String... talkWord) {
             if (talkWord == null || talkWord[0].isEmpty()) return null;
+            NetworkParseResponse botChat = new NetworkParseResponse();
 
-            NetworkParseResponse.appendProgressBar(progress);
-            NetworkParseResponse.formURL(talkWord[0], preferences.getLong("uid", 0));
-            NetworkParseResponse.establishConnectionGetResponse();
+            botChat.appendProgressBar(progress);
+            botChat.formURL(talkWord[0], preferences.getLong("uid", 0));
+            botChat.establishConnectionGetResponse();
 
-            return NetworkParseResponse.getBotResponse();
+            return botChat.getBotResponse();
         }
 
         @Override
