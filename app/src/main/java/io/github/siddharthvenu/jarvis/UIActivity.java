@@ -15,26 +15,24 @@ import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
-import android.text.method.ScrollingMovementMethod;
-import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
+import android.webkit.WebView;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.jarvis.R;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.lang.Character;
 
 public class UIActivity extends AppCompatActivity {
 
-    public static final String LOG_TAG = "Project JARVIS";
-    private TextView botResponseTextView, nammaInput;
+    //public static final String LOG_TAG = "Project JARVIS";
+    private WebView nammaInputWebView;
+    private WebView botResponseWebView;
     private ImageView jarvisLogo;
     public ProgressBar progress;
     private final int REQUEST_CODE = 1234;
@@ -47,10 +45,10 @@ public class UIActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_ui);
 
-        botResponseTextView = (TextView) findViewById(R.id.botResponse);
-        botResponseTextView.setMovementMethod(new ScrollingMovementMethod());
-        nammaInput = (TextView) findViewById(R.id.nammaInput);
-        nammaInput.setMovementMethod(new ScrollingMovementMethod());
+        botResponseWebView = (WebView) findViewById(R.id.botResponseWebView);
+        botResponseWebView.setBackgroundColor(0);
+        nammaInputWebView = (WebView) findViewById(R.id.nammaInputWebView);
+        nammaInputWebView.setBackgroundColor(0);
         jarvisLogo = (ImageView) findViewById(R.id.jarvisLogo);
         progress = (ProgressBar) findViewById(R.id.progressBar);
 
@@ -91,7 +89,7 @@ public class UIActivity extends AppCompatActivity {
 
     // Exit the app
     private void exit() {
-        botResponseTextView.setText(R.string.exit_message);
+        parseHTMLSetWebView(getString(R.string.exit_message), 1);
         Handler mHandler = new Handler();
         mHandler.postDelayed(new Runnable() {
             @Override
@@ -106,13 +104,13 @@ public class UIActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_CODE && resultCode == RESULT_OK) {
             chat = data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS).get(0);
-            nammaInput.setText(chat);
+            parseHTMLSetWebView(chat, 0);
             //Log.v(LOG_TAG, chat);
 
             /* Check if the user gave a command for Jarvis to open an app, or to exit the app, or
             just a normal chat , and do the appropriate action*/
             if (isAppOpenCommand()) {
-                botResponseTextView.setText(R.string.opening_app);
+                parseHTMLSetWebView(getString(R.string.opening_app), 1);
                 new openApp().execute();
             } else if (isAppExitCommand()) {
                 exit();
@@ -122,7 +120,7 @@ public class UIActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
     }
 
-
+    // Show alert dialog with apps listed in it for  user to choose
     private void showAlertDialog(final ArrayList<ApplicationInfo> appList) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         builder.setTitle("Choose an application");
@@ -144,6 +142,7 @@ public class UIActivity extends AppCompatActivity {
         alertDialog.getWindow().setAttributes(lp);
     }
 
+    // Get app names string array from a list of ApplicationInfo
     private String[] getAppNames(List<ApplicationInfo> appList) {
         ArrayList<String> appNames = new ArrayList<>();
         for (ApplicationInfo appInfo : appList) {
@@ -152,6 +151,7 @@ public class UIActivity extends AppCompatActivity {
         return appNames.toArray(new String[appNames.size()]);
     }
 
+    // Retrieve the apps which match the given app name
     private ArrayList<ApplicationInfo> retrieveMatchedAppInfos(List<ApplicationInfo> appList, String requestedAppName) {
         ArrayList<ApplicationInfo> matchingAppNames = new ArrayList<>();
         for (ApplicationInfo appInfo : appList) {
@@ -179,7 +179,7 @@ public class UIActivity extends AppCompatActivity {
             jarvisLogo.setVisibility(View.INVISIBLE);
             progress.setProgress(0);
             progress.setVisibility(View.VISIBLE);
-            botResponseTextView.setVisibility(View.INVISIBLE);
+            botResponseWebView.setVisibility(View.INVISIBLE);
         }
 
         @Override
@@ -199,13 +199,34 @@ public class UIActivity extends AppCompatActivity {
             progress.setVisibility(View.INVISIBLE);
             jarvisLogo.setVisibility(View.VISIBLE);
             if (botResponse != null) {
-                botResponseTextView.setText(botResponse);
+                parseHTMLSetWebView(botResponse, 1);
             }
-            botResponseTextView.setVisibility(View.VISIBLE);
+            botResponseWebView.setVisibility(View.VISIBLE);
         }
     }
 
-    private class openApp extends AsyncTask<Void,Void,List<ApplicationInfo>> {
+    /* n will be 1 if we want to edit the botResponseWebView and 0 if we want to edit the
+    inputWebView */
+    private void parseHTMLSetWebView(String text, int n) {
+        String html;
+        html = "<html><head>"
+                + "<style type=\"text/css\">";
+        if (n == 1)
+            html += "body { color: #FFFFFF; font-size:x-large; text-shadow: 2px 2px 8px #ff8600;}";
+        else
+            html += "body { color: #FFFFFF; font-size:x-large; text-shadow: 2px 2px 8px #2450cf31;}";
+        html += "</style></head>"
+                + "<body>"
+                + text
+                + "</body></html>";
+        if (n == 1)
+            botResponseWebView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
+        else
+            nammaInputWebView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null);
+    }
+
+    // Open app based on value of chat
+    private class openApp extends AsyncTask<Void, Void, List<ApplicationInfo>> {
 
         @Override
         protected List<ApplicationInfo> doInBackground(Void[] params) {
@@ -228,7 +249,7 @@ public class UIActivity extends AppCompatActivity {
                     index--;
                 }
                 //The above for loop removes the word at the end of the requested app name
-                Log.v(LOG_TAG, requestedAppName.toString());
+                //Log.v(LOG_TAG, requestedAppName.toString());
                 matchingAppsList = retrieveMatchedAppInfos(appList, requestedAppName.toString());
             }
             return matchingAppsList;
@@ -237,12 +258,12 @@ public class UIActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(List<ApplicationInfo> matchingAppsList) {
             if (matchingAppsList.size() == 0)
-                botResponseTextView.setText(R.string.app_not_found);
+                parseHTMLSetWebView(getString(R.string.app_not_found), 1);
             else if (matchingAppsList.size() == 1) {
-                botResponseTextView.setText(R.string.app_opened);
+                parseHTMLSetWebView(getString(R.string.app_opened), 1);
                 startActivity(getPackageManager().getLaunchIntentForPackage(matchingAppsList.get(0).packageName));
             } else {
-                botResponseTextView.setText(R.string.app_opened);
+                parseHTMLSetWebView(getString(R.string.app_opened), 1);
                 showAlertDialog((ArrayList<ApplicationInfo>) matchingAppsList);
             }
         }

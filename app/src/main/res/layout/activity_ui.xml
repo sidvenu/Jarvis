@@ -4,20 +4,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/background"
-    android:paddingBottom="@dimen/activity_vertical_margin"
-    android:paddingLeft="@dimen/activity_horizontal_margin"
-    android:paddingRight="@dimen/activity_horizontal_margin"
-    android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="io.github.siddharthvenu.jarvis.UIActivity">
-
 
     <ImageView
         android:id="@+id/jarvisLogo"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentRight="true"
-        android:layout_centerVertical="true"
+        android:layout_centerInParent="true"
         android:contentDescription="@string/jarvis_logo"
         android:scaleType="fitCenter"
         android:src="@drawable/tumblr_static_jarvis" />
@@ -34,29 +27,6 @@
         android:scaleType="centerInside"
         android:src="@drawable/roundbutton" />
 
-    <TextView
-        android:id="@+id/nammaInput"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:textColor="#a4a2a2"
-        android:textSize="30sp"
-        tools:text="Namma Chatu" />
-
-    <TextView
-        android:id="@+id/botResponse"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/nammaInput"
-        android:layout_centerHorizontal="true"
-        android:maxLines="6"
-        android:paddingTop="16dp"
-        android:scrollbars="vertical"
-        android:textColor="#e96d14"
-        android:textSize="30sp"
-        tools:text="Bot ResponseBot ResponseBot ResponseBot ResponseBot ResponseBot ResponseBot ResponseBot ResponseBot ResponseBot ResponseBot ResponseBot ResponseBot Response" />
-
     <ProgressBar
         android:id="@+id/progressBar"
         style="?android:attr/progressBarStyleHorizontal"
@@ -67,5 +37,25 @@
         android:max="100"
         android:visibility="invisible" />
 
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        android:paddingBottom="70dp"
+        android:paddingLeft="@dimen/activity_horizontal_margin"
+        android:paddingRight="@dimen/activity_horizontal_margin"
+        android:paddingTop="@dimen/activity_vertical_margin">
+        <WebView
+            android:id="@+id/nammaInputWebView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <WebView
+            android:id="@+id/botResponseWebView"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"/>
+    </LinearLayout>
 
 </RelativeLayout>

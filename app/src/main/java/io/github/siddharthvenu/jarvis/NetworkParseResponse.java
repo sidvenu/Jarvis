@@ -85,7 +85,7 @@ final class NetworkParseResponse {
         try {
             JSONObject rootObject = new JSONObject(jsonData);
             //Log.v(UIActivity.LOG_TAG, rootObject.getString("cnt").replace("\\", ""));
-            return rootObject.getString("cnt").replace("\\", "").replace("<notts voice=\"I'm searching...\"/>", "");
+            return rootObject.getString("cnt").replace("\\", "");
         } catch (JSONException e) {
             e.printStackTrace();
         }
