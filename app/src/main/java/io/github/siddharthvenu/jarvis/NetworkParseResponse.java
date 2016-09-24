@@ -22,7 +22,7 @@ final class NetworkParseResponse {
     private static String botResponse = null;
     private ProgressBar progressBar = null;
 
-
+    // Form the url for the connection to be established
     void formURL(String talkWord, long uid) {
         try {
             talkWord = talkWord.replace(" ", "%20").replace("!", "");
@@ -36,10 +36,12 @@ final class NetworkParseResponse {
         }
     }
 
+    // Get the progressbar from UIActivity so as to easily update it
     void appendProgressBar(ProgressBar progress) {
         progressBar = progress;
     }
 
+    // Establish the connection with the server and get the JSON response
     void establishConnectionGetResponse() {
         try {
             HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
@@ -59,10 +61,12 @@ final class NetworkParseResponse {
         }
     }
 
+    // A helper method for setting the progress value in the progressBar
     private void publishProgress(int progress) {
         progressBar.setProgress(progress);
     }
 
+    // Get the JSON Response as a string from the server
     private String getStringFromInputStream(InputStream inputStream) throws IOException {
         StringBuilder stringBuilder = new StringBuilder();
         if (inputStream != null) {
@@ -76,6 +80,7 @@ final class NetworkParseResponse {
         return stringBuilder.toString();
     }
 
+    // Parse the JSON response the server hath sent
     private String parseBotResponse(String jsonData) {
         try {
             JSONObject rootObject = new JSONObject(jsonData);
@@ -87,6 +92,7 @@ final class NetworkParseResponse {
         return null;
     }
 
+    // Send back the result bot response
     String getBotResponse() {
         return botResponse;
     }

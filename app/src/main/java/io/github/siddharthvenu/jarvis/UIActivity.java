@@ -16,6 +16,7 @@ import android.speech.RecognizerIntent;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.method.ScrollingMovementMethod;
+import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageButton;
@@ -28,10 +29,11 @@ import com.example.jarvis.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.lang.Character;
 
 public class UIActivity extends AppCompatActivity {
 
-    //public static final String LOG_TAG = "Project JARVIS";
+    public static final String LOG_TAG = "Project JARVIS";
     private TextView botResponseTextView, nammaInput;
     private ImageView jarvisLogo;
     public ProgressBar progress;
@@ -52,11 +54,16 @@ public class UIActivity extends AppCompatActivity {
         jarvisLogo = (ImageView) findViewById(R.id.jarvisLogo);
         progress = (ProgressBar) findViewById(R.id.progressBar);
 
+        /* Check if the device has a preference "uid" which each user has a unique one. If the
+        device does not have it, create the preference and initialize with current milli time */
         preferences = getSharedPreferences("preference", MODE_PRIVATE);
         if (!(preferences.contains("uid"))) {
             long randomUID = System.currentTimeMillis();
             preferences.edit().putLong("uid", randomUID).commit();
         }
+
+        /* Listen for input every time the ImageButton is clicked. If the device is not connected, then
+         alert the user about it */
         ImageButton startListening = (ImageButton) findViewById(R.id.speech_button);
         startListening.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -74,10 +81,24 @@ public class UIActivity extends AppCompatActivity {
         new NetworkAsyncTask().execute("Hey there!");
     }
 
+    // Check if the device is connected to the internet
     private boolean isConnected() {
         ConnectivityManager cm = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo net = cm.getActiveNetworkInfo();
         return net != null && net.isAvailable() && net.isConnected();
+    }
+
+
+    // Exit the app
+    private void exit() {
+        botResponseTextView.setText(R.string.exit_message);
+        Handler mHandler = new Handler();
+        mHandler.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                finish();
+            }
+        }, 2000);
     }
 
     @SuppressLint("SetTextI18n")
@@ -88,9 +109,11 @@ public class UIActivity extends AppCompatActivity {
             nammaInput.setText(chat);
             //Log.v(LOG_TAG, chat);
 
+            /* Check if the user gave a command for Jarvis to open an app, or to exit the app, or
+            just a normal chat , and do the appropriate action*/
             if (isAppOpenCommand()) {
-                openApp();
-
+                botResponseTextView.setText(R.string.opening_app);
+                new openApp().execute();
             } else if (isAppExitCommand()) {
                 exit();
             } else new NetworkAsyncTask().execute(chat);
@@ -98,6 +121,7 @@ public class UIActivity extends AppCompatActivity {
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
+
 
     private void showAlertDialog(final ArrayList<ApplicationInfo> appList) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
@@ -145,37 +169,10 @@ public class UIActivity extends AppCompatActivity {
 
     private boolean isAppExitCommand() {
         String temp = chat.toLowerCase();
-        return temp.contains("exit")||temp.contains("bye")||temp.contains("gotta go")||temp.contains("got to go");
+        return temp.contains("exit") || temp.contains("bye") || temp.contains("gotta go") || temp.contains("got to go");
     }
 
-    private void openApp() {
-        String requestedAppName = chat.substring(chat.indexOf("open ") + 5);
-        List<ApplicationInfo> appList = getPackageManager().getInstalledApplications(0);
-        appList = retrieveMatchedAppInfos(appList, requestedAppName);
-
-        if (appList.size() == 0) //Log.v(LOG_TAG, "App not found");
-            botResponseTextView.setText("No app called \"" + requestedAppName + "\" was found. This can't be happening :(");
-        else if (appList.size() == 1) {
-            botResponseTextView.setText(R.string.opening_app);
-            startActivity(getPackageManager().getLaunchIntentForPackage(appList.get(0).packageName));
-        } else {
-            botResponseTextView.setText(R.string.opening_app);
-            showAlertDialog((ArrayList<ApplicationInfo>) appList);
-        }
-    }
-
-    private void exit() {
-        botResponseTextView.setText(R.string.exit_message);
-        Handler mHandler = new Handler();
-        mHandler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                finish();
-            }
-        }, 2000);
-    }
-
-    private class NetworkAsyncTask extends AsyncTask<String, Integer, String> {
+    private class NetworkAsyncTask extends AsyncTask<String, Void, String> {
 
         @Override
         protected void onPreExecute() {
@@ -205,6 +202,49 @@ public class UIActivity extends AppCompatActivity {
                 botResponseTextView.setText(botResponse);
             }
             botResponseTextView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private class openApp extends AsyncTask<Void,Void,List<ApplicationInfo>> {
+
+        @Override
+        protected List<ApplicationInfo> doInBackground(Void[] params) {
+            StringBuilder requestedAppName = new StringBuilder(chat.substring(chat.indexOf("open ") + 5));
+
+            List<ApplicationInfo> appList = getPackageManager().getInstalledApplications(0), matchingAppsList;
+            matchingAppsList = retrieveMatchedAppInfos(appList, requestedAppName.toString());
+
+        /* If the matchingAppList size be 0, then check Apps with words at the end removed too.
+        For example, if "WhatsApp Pro" yields 0 results, then try searching "WhatsApp" too! */
+            while (matchingAppsList.size() == 0 && requestedAppName.length() > 0) {
+                if (requestedAppName.toString().endsWith(" "))
+                    requestedAppName.deleteCharAt(requestedAppName.lastIndexOf(" "));
+                int index = requestedAppName.length() - 1;
+
+                for (Character curChar = requestedAppName.charAt(index);
+                     !curChar.equals(' ') && !curChar.toString().isEmpty() && index >= 0; ) {
+                    curChar = requestedAppName.charAt(index);
+                    requestedAppName.deleteCharAt(index);
+                    index--;
+                }
+                //The above for loop removes the word at the end of the requested app name
+                Log.v(LOG_TAG, requestedAppName.toString());
+                matchingAppsList = retrieveMatchedAppInfos(appList, requestedAppName.toString());
+            }
+            return matchingAppsList;
+        }
+
+        @Override
+        protected void onPostExecute(List<ApplicationInfo> matchingAppsList) {
+            if (matchingAppsList.size() == 0)
+                botResponseTextView.setText(R.string.app_not_found);
+            else if (matchingAppsList.size() == 1) {
+                botResponseTextView.setText(R.string.app_opened);
+                startActivity(getPackageManager().getLaunchIntentForPackage(matchingAppsList.get(0).packageName));
+            } else {
+                botResponseTextView.setText(R.string.app_opened);
+                showAlertDialog((ArrayList<ApplicationInfo>) matchingAppsList);
+            }
         }
     }
 
